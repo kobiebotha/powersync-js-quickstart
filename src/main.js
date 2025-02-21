@@ -1,7 +1,6 @@
 import './style.css'
 import javascriptLogo from './javascript.svg'
 import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
 
 import { column, Schema, Table, PowerSyncDatabase } from '@powersync/web';
 import Logger from 'js-logger';
@@ -23,6 +22,23 @@ if (process.env.NODE_ENV === 'development') {
   window.db = db;
 }
 
+// Initialize counter
+let count = 0;
+
+// Watch for changes
+const abortController = new AbortController();
+
+async function setupWatcher() {
+  for await (const update of db.watch(
+    'SELECT * from counters',
+    [],
+    { signal: abortController.signal }
+  )) {
+    count = update.rows._array.length;
+    countButton.textContent = `count is ${count}`;
+  }
+};
+
 document.querySelector('#app').innerHTML = `
   <div>
     <a href="https://vite.dev" target="_blank">
@@ -41,4 +57,9 @@ document.querySelector('#app').innerHTML = `
   </div>
 `
 
-setupCounter(document.querySelector('#counter'))
+const countButton = document.querySelector('#counter');
+countButton.addEventListener('click', async () => {
+  await db.execute('INSERT INTO counters(id, count, floatcount, created_at) VALUES(uuid(), ?, ?,current_timestamp)', [1, 1.2]);
+});
+
+setupWatcher();
