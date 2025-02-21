@@ -34,10 +34,23 @@ async function setupWatcher() {
     [],
     { signal: abortController.signal }
   )) {
+    updateTable(update.rows);
     count = update.rows._array.length;
     countButton.textContent = `count is ${count}`;
   }
 };
+
+function updateTable(rows) {
+  const tbody = document.querySelector('#table tbody');
+
+  tbody.innerHTML = rows._array.map(row => `
+    <tr>
+      <td>${row.count}</td>
+      <td>${row.floatcount}</td>
+      <td>${row.created_at}</td>
+    </tr>
+  `).join('');
+}
 
 document.querySelector('#app').innerHTML = `
   <div>
@@ -51,6 +64,16 @@ document.querySelector('#app').innerHTML = `
     <div class="card">
       <button id="counter" type="button"></button>
     </div>
+    <table id="table">
+      <thead>
+        <tr>
+          <th>Count</th>
+          <th>Float</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
     <p class="read-the-docs">
       Click on the Vite logo to learn more
     </p>
