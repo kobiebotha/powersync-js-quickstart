@@ -3,6 +3,26 @@ import javascriptLogo from './javascript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.js'
 
+import { column, Schema, Table, PowerSyncDatabase } from '@powersync/web';
+import Logger from 'js-logger';
+
+const counters = new Table({ count: column.integer, floatcount: column.real, created_at: column.text })
+const AppSchema = new Schema({ counters });
+
+export const db = new PowerSyncDatabase({
+  schema: AppSchema,
+  database: {
+    dbFilename: 'powersync.db'
+  }
+});
+
+Logger.useDefaults();
+Logger.setLevel(Logger.DEBUG);
+
+if (process.env.NODE_ENV === 'development') {
+  window.db = db;
+}
+
 document.querySelector('#app').innerHTML = `
   <div>
     <a href="https://vite.dev" target="_blank">
